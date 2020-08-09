@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:provider/provider.dart';
+
+import './providers/cache_fetcher.dart';
+
+import './screens/location_screen.dart';
+import './screens/home_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -9,34 +14,58 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return MultiProvider(
+      providers: [ChangeNotifierProvider.value(value: CacheFetcher())],
+      child: MaterialApp(
+        title: 'KwiBerry',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: InitPage(),
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
+//this is where we retrieve user datas using sharedpreferences from caches to prevent
+//re-entering details and user locations
+class InitPage extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _InitPageState createState() => _InitPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _InitPageState extends State<InitPage> {
+  bool locationExist = false;
+  void fetch() async {
+    locationExist = await Provider.of<CacheFetcher>(context, listen: false)
+        .retrieveLocation();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetch();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: WebView(
-      javascriptMode: JavascriptMode.unrestricted,
-      initialUrl: 'https://kwbry.netlify.app/',
-    ));
+    return locationExist ? HomeScreen() : LocationScreen();
+    // Scaffold(
+    //   body: SafeArea(
+    //       child: Stack(
+    //     children: [
+    //       Container(
+    //           decoration: BoxDecoration(
+    //         image: DecorationImage(
+    //             image: AssetImage('assets/images/veg.png'), fit: BoxFit.cover),
+    //       )),
+    //       BackdropFilter(
+    //         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+    //         child: Container(color: Colors.black.withOpacity(0)),
+    //       ),
+    //     ],
+    //   )),
+    // );
   }
 }

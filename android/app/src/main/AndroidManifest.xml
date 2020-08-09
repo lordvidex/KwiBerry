@@ -9,6 +9,12 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="KwiBerry"
         android:icon="@mipmap/ic_launcher">
+        <!--
+          API KEy for android added here
+        -->
+        <meta-data
+          android:name="com.google.android.geo.API_KEY"
+          android:value="AIzaSyC8daLQegMeDpfnymSxGBdCjkK2LAaEvAI"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
