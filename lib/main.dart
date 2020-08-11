@@ -15,7 +15,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider.value(value: CacheFetcher())],
+      providers: [
+        ChangeNotifierProvider.value(value: CacheFetcher()),
+      ],
       child: MaterialApp(
         title: 'KwiBerry',
         debugShowCheckedModeBanner: false,
@@ -23,6 +25,10 @@ class MyApp extends StatelessWidget {
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
         home: InitPage(),
+        routes: {
+          HomeScreen.routeName: (_) => HomeScreen(),
+          LocationScreen.routeName: (_) => LocationScreen(),
+        },
       ),
     );
   }
@@ -37,20 +43,26 @@ class InitPage extends StatefulWidget {
 
 class _InitPageState extends State<InitPage> {
   bool locationExist = false;
-  void fetch() async {
-    locationExist = await Provider.of<CacheFetcher>(context, listen: false)
-        .retrieveLocation();
-  }
 
   @override
   void initState() {
     super.initState();
-    fetch();
   }
 
   @override
   Widget build(BuildContext context) {
-    return locationExist ? HomeScreen() : LocationScreen();
+    return FutureBuilder(
+        future: Provider.of<CacheFetcher>(context, listen: false)
+            .retrieveLocation(),
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.data == true) {
+            return HomeScreen();
+          } else {
+            return LocationScreen();
+          }
+        });
     // Scaffold(
     //   body: SafeArea(
     //       child: Stack(
